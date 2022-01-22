@@ -1,0 +1,9 @@
+
+*.meta
+*.dll
+.vs/BVH-CUA/v16/.suo
+*.xml
+*.CopyComplete
+*.cache
+*.pdb
+*.txt
