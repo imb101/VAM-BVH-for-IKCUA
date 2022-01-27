@@ -15,6 +15,7 @@ namespace UniHumanoid
         public int SourceType;
 
         public Avatar Avatar;
+        public Atom controller;
 
         #region Standalone
         public HumanPose CreatePose()
@@ -22,9 +23,9 @@ namespace UniHumanoid
             
             var handler = new HumanPoseHandler(Avatar, transform);
             var pose = default(HumanPose);
+
             handler.GetHumanPose(ref pose);
-            pose.bodyPosition = Vector3.zero;
-            pose.bodyRotation = Quaternion.identity;
+
             return pose;
         }
         public void SetPose(HumanPose pose)
@@ -56,7 +57,7 @@ namespace UniHumanoid
 
 
         public HumanPoseTransfer Source;
-
+        HumanPoseHandler m_handler;
 
         public HumanPoseClip PoseClip;
 
@@ -67,7 +68,7 @@ namespace UniHumanoid
             SetTPose(Avatar, transform);
         }
 
-        HumanPoseHandler m_handler;
+       
         public void OnEnable()
         {
             var animator = GetComponent<Animator>();
@@ -94,33 +95,37 @@ namespace UniHumanoid
         int m_lastFrameCount = -1;
 
         public bool GetPose(int frameCount, ref HumanPose pose)
-        {
+        {            
             if (PoseClip != null)
             {
                 pose = PoseClip.GetPose();
+              //  pose.bodyPosition = controller.freeControllers[0].transform.position;
+            //    pose.bodyRotation = controller.freeControllers[0].transform.rotation;
                 return true;
             }
 
             if (m_handler == null)
             {
                 pose = m_pose;
+              //  m_pose.bodyPosition = controller.freeControllers[0].transform.position;
+             //   m_pose.bodyRotation = controller.freeControllers[0].transform.rotation;
                 return false;
             }
 
             if (frameCount != m_lastFrameCount)
             {
                 m_handler.GetHumanPose(ref m_pose);
+                //m_pose.bodyPosition = controller.freeControllers[0].transform.position;
+                //m_pose.bodyRotation = controller.freeControllers[0].transform.rotation;
                 m_lastFrameCount = frameCount;
             }
+           // m_pose.bodyPosition = controller.freeControllers[0].transform.position;
+           // m_pose.bodyRotation = controller.freeControllers[0].transform.rotation;
             pose = m_pose;
+                    
             return true;
         }
 
-        public void setSource(ref HumanPoseTransfer sourceT)
-        {            
-            Source = sourceT;
-           
-        }
 
         public void Update()
         {
@@ -132,9 +137,9 @@ namespace UniHumanoid
                 case HumanPoseTransferSourceType.HumanPoseTransfer:                                           
                     if (Source != null && m_handler != null)
                     {
-                        
+
                         if (Source.GetPose(Time.frameCount, ref m_pose))
-                        {                            
+                        {                                                        
                             m_handler.SetHumanPose(ref m_pose);
                         }
                     }
@@ -143,7 +148,7 @@ namespace UniHumanoid
                 case HumanPoseTransferSourceType.HumanPoseClip:
                     if (PoseClip != null)
                     {
-                        var pose = PoseClip.GetPose();
+                        var pose = PoseClip.GetPose();                      
                         m_handler.SetHumanPose(ref pose);
                     }
                     break;

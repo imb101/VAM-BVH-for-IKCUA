@@ -52,35 +52,42 @@ namespace UniHumanoid
             Bvh = Bvh.Parse(Source);
         }
 
-        public void Load()
+        public void Load(float height)
+        {
+            var Root = new GameObject(FileManagerSecure.GetFileName(Path));
+            Load(Root, height);
+        }
+
+        public void Load(GameObject Root_, float height)
         {
             //
             // build hierarchy
             //
-
-            Root = new GameObject(FileManagerSecure.GetFileName(Path));
-//            Root = new GameObject(System.IO.Path.GetFileNameWithoutExtension(Path));
-            var hips = BuildHierarchy(Root.transform, Bvh.Root, 1.0f);
+            Root = Root_;
+            var hips = BuildHierarchy(Root.transform, Bvh.Root,height);
             var skeleton = Skeleton.Estimate(hips);
             var description = AvatarDescription.Create(hips.Traverse().ToArray(), skeleton);
 
             //
             // scaling. reposition
             //
-            float scaling = 1.0f;
-            {
-                //var foot = animator.GetBoneTransform(HumanBodyBones.LeftFoot);
-                var foot = hips.Traverse().Skip(skeleton.GetBoneIndex(HumanBodyBones.LeftFoot)).First();
-                var hipHeight = hips.position.y - foot.position.y;
-                // hips height to a meter
-                scaling = 1.0f / hipHeight;
-                foreach (var x in Root.transform.Traverse())
-                {
-                    x.localPosition *= scaling;
-                }
-
-                var scaledHeight = hipHeight * scaling;
-                hips.position = new Vector3(0, scaledHeight, 0); // foot to ground
+           float scaling = 1.0f;
+           {
+                       //var foot = animator.GetBoneTransform(HumanBodyBones.LeftFoot);
+                       var foot = hips.Traverse().Skip(skeleton.GetBoneIndex(HumanBodyBones.LeftFoot)).First();
+                       var hipHeight = hips.position.y - foot.position.y;
+                       // hips height to a meter
+                       scaling = 1.0f / hipHeight;
+                       foreach (var x in Root.transform.Traverse())
+                       {
+                           x.localPosition *= scaling;
+                       }
+                       //+scaledHeight
+                       var scaledHeight = hipHeight * scaling;
+                      // hips.localPosition = new Vector3(scaledHeightRoot_.transform.position.x , Root_.transform.position.y * scaledHeight, Root_.transform.position.z * scaledHeight); // foot to ground
+                      // hips.position = new Vector3(0,  scaledHeight, 0); // foot to ground
+                       hips.position = new Vector3(Root_.transform.position.x, scaledHeight, Root_.transform.position.z); // foot to ground
+                       //hips.position = new Vector3(Root_.transform.position.x, Root_.transform.position.y+scaledHeight, Root_.transform.position.z); // foot to ground
             }
 
             //
@@ -98,22 +105,21 @@ namespace UniHumanoid
             Animation = BvhAnimation.CreateAnimationClip(Bvh, scaling);
             Animation.name = Root.name;
             Animation.legacy = true;
-            Animation.wrapMode = WrapMode.Loop;
+            Animation.wrapMode = WrapMode.Once;
 
             srcAnimation = Root.AddComponent<Animation>();
             srcAnimation.AddClip(Animation, Animation.name);
-            srcAnimation.clip = Animation;
-            
+            srcAnimation.clip = Animation;            
 
             var humanPoseTransfer = Root.AddComponent<HumanPoseTransfer>();
             humanPoseTransfer.Avatar = Avatar;
 
             // create SkinnedMesh for bone visualize
-          //  var renderer = SkeletonMeshUtility.CreateRenderer(animator);
-           // Material = new Material(Shader.Find("Standard"));
-           // renderer.sharedMaterial = Material;
-            //Mesh = renderer.sharedMesh;
-            //Mesh.name = "box-man";
+            var renderer = SkeletonMeshUtility.CreateRenderer(animator);
+            Material = new Material(Shader.Find("Standard"));
+            renderer.sharedMaterial = Material;
+            Mesh = renderer.sharedMesh;
+            Mesh.name = "box-man";
 
             Root.AddComponent<BoneMapping>();
 
@@ -122,9 +128,10 @@ namespace UniHumanoid
         static Transform BuildHierarchy(Transform parent, BvhNode node, float toMeter)
         {
             var go = new GameObject(node.Name);
-            go.transform.localPosition = node.Offset.ToXReversedVector3() * toMeter;
-            go.transform.SetParent(parent, false);
 
+            go.transform.position = node.Offset.ToXReversedVector3() * toMeter;
+            go.transform.SetParent(parent, false);
+           
             //var gizmo = go.AddComponent<BoneGizmoDrawer>();
             //gizmo.Draw = true;
 

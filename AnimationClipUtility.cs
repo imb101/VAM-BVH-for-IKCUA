@@ -54,8 +54,8 @@ namespace UniHumanoid
         {
             var clip = new AnimationClip();
 
-            // pos
-            {
+            // pos dont want to move root pos!
+        {
                 var curve = new AnimationCurve(new Keyframe[]
                 {
                 new Keyframe(0, pose.bodyPosition.x),
@@ -79,7 +79,7 @@ namespace UniHumanoid
                 var muscle = "RootT.z";
                 clip.SetCurve(null, typeof(Animator), muscle, curve);
             }
-
+           
             // rot
             {
                 var curve = new AnimationCurve(new Keyframe[]

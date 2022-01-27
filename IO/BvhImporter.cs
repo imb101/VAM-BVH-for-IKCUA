@@ -9,7 +9,7 @@ namespace UniHumanoid
         public static void Import(BvhImporterContext context)
         {
             context.Parse(context.Path);
-            context.Load();
+            context.Load(1f);
         }
     }
 }

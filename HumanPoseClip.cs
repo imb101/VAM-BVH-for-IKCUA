@@ -26,7 +26,7 @@ namespace UniHumanoid
         public void ApplyPose(ref HumanPose pose)
         {
             bodyPosition = pose.bodyPosition;
-            bodyRotation = pose.bodyRotation;
+            bodyRotation =  pose.bodyRotation;
             muscles = (float[])pose.muscles.Clone();
         }
     }
